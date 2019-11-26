@@ -3,32 +3,51 @@ import numpy as np
 import statsmodels
 import statsmodels.api as sm
 from scipy import stats
+from sklearn.model_selection import train_test_split, StratifiedKFold
 
 
-def McNemar(A, B):
-    """ hand written McNemar's test
-    :param A: binary prediction results from classifier A, 1D array
-    :param B: binary prediction results from classifier B, 1D array
-    :return: statistic
-    """
-    diff = A - B
-    n01 = np.count_nonzero(diff == 1)
-    n10 = np.count_nonzero(diff == -1)
-    print(n01, n10)
-    return (abs(n01 - n10) - 1) ** 2 / (n01 + n10)
+# def McNemar(A, B):
+#     """ hand written McNemar's test
+#     :param A: binary prediction results from classifier A, 1D array
+#     :param B: binary prediction results from classifier B, 1D array
+#     :return: statistic
+#     """
+#     diff = A - B
+#     n01 = np.count_nonzero(diff == 1)
+#     n10 = np.count_nonzero(diff == -1)
+#     print(n01, n10)
+#     return (abs(n01 - n10) - 1) ** 2 / (n01 + n10)
 
 
-def McNemarTest(A, B, alpha=0.05):
+# def McNemarTest(A, B, alpha=0.05):
+#     """ use McNemar's test from statsmodels
+#     :param A: binary prediction results from classifier A, 1D array
+#     :param B: binary prediction results from classifier B, 1D array
+#     :return: statistic, pvalue
+#     """
+#     AB = np.vstack((A, B)).T
+#     table = sm.stats.Table.from_data(AB)
+#     bunch = statsmodels.stats.contingency_tables.mcnemar(table.table_orig.values, exact=False, correction=True)
+#     rslt = table.test_ordinal_association()
+#     return bunch.statistic, rslt.pvalue
+
+
+def McNemarTest(clf1, clf2, X, y, alpha=0.05, test_size=0.2):
     """ use McNemar's test from statsmodels
     :param A: binary prediction results from classifier A, 1D array
     :param B: binary prediction results from classifier B, 1D array
     :return: statistic, pvalue
     """
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+    clf1.train(X_train, y_train)
+    cfl2.train(X_train, y_train)
+    A = clf1.predict(X_test)
+    B = clf2.predict(X_test)
+
     AB = np.vstack((A, B)).T
     table = sm.stats.Table.from_data(AB)
-    bunch = statsmodels.stats.contingency_tables.mcnemar(table.table_orig.values, exact=False, correction=True)
     rslt = table.test_ordinal_association()
-    return bunch.statistic, rslt.pvalue
+    return rslt.pvalue
 
 
 def CV52PairedTTest(clf1, clf2, X, y, alpha=0.05):
@@ -47,8 +66,8 @@ def CV52PairedTTest(clf1, clf2, X, y, alpha=0.05):
             X_test, y_test = X[test_idx], y[test_idx]
             clf1.train(X_train, y_train)
             cfl2.train(X_train, y_train)
-            score1 = clf1.predict(X_test, y_test, metric='auc')
-            score2 = clf2.predict(X_test, y_test, metric='auc')
+            score1 = clf1.score(X_test, y_test, metric='auc')
+            score2 = clf2.score(X_test, y_test, metric='auc')
             pi[i_f] = score1 - score2
             if i_s == 0 and i_f == 0:
                 p11 = pi[0]

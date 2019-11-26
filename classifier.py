@@ -8,7 +8,10 @@ class Classifier:
     def train(self, X, y):
         self.clf(X, y)
 
-    def predict(self, X, y, metric='error'):
+    def predict(self, X):
+        return self.clf.predict(X)
+
+    def score(self, X, y, metric='error'):
         """
         Possible evaluation metrics:
         1. accuracy
