@@ -14,14 +14,18 @@ print(X.shape, y.shape)
 clf1 = Classifier(XGBClassifier(n_jobs=8))
 clf2 = Classifier(RandomForestClassifier(n_estimators=20, n_jobs=8))
 
-decision = McNemarTest(clf1, clf2, X, y)
-if decision:
+
+print("McNemar's test:")
+reject = McNemarTest(clf1, clf2, X, y)
+if reject:
     print('reject null hypothesis')
 else:
     print('fail to reject null hypothesis: clf1 and clf2 make errors in the same way')
 
-decision = CV52PairedTTest(clf1, clf2, X, y)
-if decision:
+
+print("5x2 cv paired t test")
+reject = CV52PairedTTest(clf1, clf2, X, y)
+if reject:
     print('reject null hypothesis')
 else:
     print('fail to reject null hypothesis: clf1 and clf2 make errors in the same way')
