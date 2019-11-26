@@ -23,21 +23,21 @@ clf5 = Classifier(LogisticRegression(penalty='l2'))
 clfs = [clf1,clf2,clf3,clf4,clf5]
 
 for i in range(len(clfs)):
-	for j in range(i+1,len(clfs)):
-		clf1 = clfs[i]
-		clf2 = clfs[j]
+    for j in range(i+1,len(clfs)):
+        clf1 = clfs[i]
+        clf2 = clfs[j]
 
-		print("McNemar's test:")
-		reject = McNemarTest(clf1, clf2, X, y)
-		if reject:
-		    print('reject null hypothesis')
-		else:
-		    print('fail to reject null hypothesis: clf1 and clf2 make errors in the same way')
+        print("McNemar's test:")
+        reject = McNemarTest(clf1, clf2, X, y)
+        if reject:
+            print('reject null hypothesis')
+        else:
+            print('fail to reject null hypothesis: clf1 and clf2 make errors in the same way')
 
 
-		print("5x2 cv paired t test")
-		reject = CV52PairedTTest(clf1, clf2, X, y)
-		if reject:
-		    print('reject null hypothesis')
-		else:
-		    print('fail to reject null hypothesis: clf1 and clf2 make errors in the same way')
+        print("5x2 cv paired t test")
+        reject = CV52PairedTTest(clf1, clf2, X, y)
+        if reject:
+            print('reject null hypothesis')
+        else:
+            print('fail to reject null hypothesis: clf1 and clf2 make errors in the same way')
