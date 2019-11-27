@@ -22,8 +22,15 @@ def santander():
     df = pd.read_csv('./santander/train.csv')
     xdf = df.drop(['ID_code', 'target'], axis=1)
     ydf = df['target']
-    X = xdf.to_numpy()
-    y = ydf.to_numpy()
+    # check pandas version
+    v = pd.__version__
+    v = int(v.split('.')[1])
+    if v < 24: # before version '0.24.0'
+        X = xdf.values
+        y = ydf.values
+    else:
+        X = xdf.to_numpy()
+        y = xdf.to_numpy()
     return X, y
 
 
@@ -65,12 +72,19 @@ def test(clfs, names, X, y):
 
             results[names[i]][names[j]] = {'McNemar':[rejectMN, score1MN, score2MN], '52CV':[rejectCV, score1CV, score2CV]}
 
-    print()
-    pprint(results)
+    return results
 
-    # save results
-    with open('results.pkl', 'wb') as f:
+
+def save_results(name, results):
+    with open(name, 'wb') as f:
         pickle.dump(results, f)
+
+
+def load_results(name):
+    with open(name, 'rb') as f:
+        results = pickle.load(f)
+    return results
+
 
 
 if __name__ == '__main__':
@@ -80,5 +94,10 @@ if __name__ == '__main__':
 
     clfs, names = classifiers()
 
-    test(clfs, names, X, y)
+    results = test(clfs, names, X, y)
+    pprint(results)
+
+    name = './santander/results.pkl'
+    save_results(name, results)
+
 
