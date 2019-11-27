@@ -48,6 +48,8 @@ def McNemarTest(clf1, clf2, X, y, alpha=0.05):
     clf2.train(X_train, y_train)
     A = clf1.predict(X_test)
     B = clf2.predict(X_test)
+    score1 = clf1.score(X_test, y_test, metric='error')
+    score2 = clf2.score(X_test, y_test, metric='error')
 
     # compute statistic
     statistic, pvalue = McNemar(A, B)
@@ -59,7 +61,7 @@ def McNemarTest(clf1, clf2, X, y, alpha=0.05):
 
     # decision: reject H0 if reject = True
     reject = statistic > chi_square
-    return reject
+    return reject, score1, score2
 
 
 def CV52PairedTTest(clf1, clf2, X, y, alpha=0.05):
@@ -77,7 +79,8 @@ def CV52PairedTTest(clf1, clf2, X, y, alpha=0.05):
     p11 = 0.0
     # initialize the variance estimate
     s_sqr = 0.0
-
+    scores1 = np.zeros(10)
+    scores2 = np.zeros(10)
     for i_s, seed in enumerate(seeds):
         folds = StratifiedKFold(n_splits=2, shuffle=True, random_state=seed)
         pi = np.zeros(2)
@@ -88,6 +91,8 @@ def CV52PairedTTest(clf1, clf2, X, y, alpha=0.05):
             clf2.train(X_train, y_train)
             score1 = clf1.score(X_test, y_test, metric='error')
             score2 = clf2.score(X_test, y_test, metric='error')
+            scores1[i_s*2+i_f] = score1
+            scores2[i_s*2+i_f] = score2
             pi[i_f] = score1 - score2
             if i_s == 0 and i_f == 0:
                 p11 = pi[0]
@@ -103,5 +108,5 @@ def CV52PairedTTest(clf1, clf2, X, y, alpha=0.05):
 
     # decision: reject H0 if reject = True
     reject = t_tilde >= t_value or t_tilde <= -t_value
-    return reject
+    return reject, np.average(scores1), np.average(scores2)
 
