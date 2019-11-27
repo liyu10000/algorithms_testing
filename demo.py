@@ -11,50 +11,74 @@ from classifier import Classifier
 from testing import McNemarTest, CV52PairedTTest
 
 
-
-data = pd.read_csv('matrix.txt', sep=',', header=None, engine='python')
-X = data.values[:,2:]
-y = data.values[:,1]
-print(X.shape, y.shape)
-
-clf1 = Classifier(XGBClassifier(n_jobs=8))
-clf2 = Classifier(RandomForestClassifier(n_estimators=20, n_jobs=8))
-clf3 = Classifier(SVC(kernel='linear', C=1.0, probability=True))
-clf4 = Classifier(LogisticRegression(penalty='l2', n_jobs=8))
-
-clfs = [clf1, clf2, clf3, clf4]
-names = ['XGB', 'RF', 'SVM', 'LR']
-results = {}
-
-for i in range(len(clfs)):
-    results[names[i]] = {}
-    for j in range(i+1, len(clfs)):
-        clf1 = clfs[i]
-        clf2 = clfs[j]
-
-        print("Testing {} vs. {}".format(names[i], names[j]))
-        print("\nMcNemar's test:")
-        rejectMN, score1MN, score2MN = McNemarTest(clf1, clf2, X, y)
-        if rejectMN:
-            print('reject null hypothesis')
-        else:
-            print('fail to reject null hypothesis: clf1 and clf2 make errors in the same way')
+def news():
+    data = pd.read_csv('matrix.txt', sep=',', header=None, engine='python')
+    X = data.values[:,2:]
+    y = data.values[:,1]
+    return X, y
 
 
-        print("\n5x2 cv paired t test:")
-        rejectCV, score1CV, score2CV = CV52PairedTTest(clf1, clf2, X, y)
-        if rejectCV:
-            print('reject null hypothesis')
-        else:
-            print('fail to reject null hypothesis: clf1 and clf2 make errors in the same way')
-
-        results[names[i]][names[j]] = {'McNemar':[rejectMN, score1MN, score2MN], '52CV':[rejectCV, score1CV, score2CV]}
-
-
-print()
-pprint(results)
+def santander():
+    df = pd.read_csv('./santander/train.csv')
+    xdf = df.drop(['ID_code', 'target'], axis=1)
+    ydf = df['target']
+    X = xdf.to_numpy()
+    y = ydf.to_numpy()
+    return X, y
 
 
-# save results
-with open('results.pkl', 'wb') as f:
-    pickle.dump(results, f)
+def classifiers():
+    clf1 = Classifier(XGBClassifier(n_jobs=8))
+    clf2 = Classifier(RandomForestClassifier(n_estimators=20, n_jobs=8))
+    clf3 = Classifier(SVC(kernel='linear', C=1.0, probability=True))
+    clf4 = Classifier(LogisticRegression(penalty='l2', n_jobs=8))
+
+    clfs = [clf1, clf2, clf3, clf4]
+    names = ['XGB', 'RF', 'SVM', 'LR']
+    return clfs, names
+
+
+def test(clfs, names, X, y):
+    results = {}
+
+    for i in range(len(clfs)):
+        results[names[i]] = {}
+        for j in range(i+1, len(clfs)):
+            clf1 = clfs[i]
+            clf2 = clfs[j]
+
+            print("\n\nTesting {} vs. {}".format(names[i], names[j]))
+            print("\nMcNemar's test:")
+            rejectMN, score1MN, score2MN = McNemarTest(clf1, clf2, X, y)
+            if rejectMN:
+                print('reject null hypothesis')
+            else:
+                print('fail to reject null hypothesis: clf1 and clf2 make errors in the same way')
+
+
+            print("\n5x2 cv paired t test:")
+            rejectCV, score1CV, score2CV = CV52PairedTTest(clf1, clf2, X, y)
+            if rejectCV:
+                print('reject null hypothesis')
+            else:
+                print('fail to reject null hypothesis: clf1 and clf2 make errors in the same way')
+
+            results[names[i]][names[j]] = {'McNemar':[rejectMN, score1MN, score2MN], '52CV':[rejectCV, score1CV, score2CV]}
+
+    print()
+    pprint(results)
+
+    # save results
+    with open('results.pkl', 'wb') as f:
+        pickle.dump(results, f)
+
+
+if __name__ == '__main__':
+    # X, y = news()
+    X, y = santander()
+    print(X.shape, y.shape)
+
+    clfs, names = classifiers()
+
+    test(clfs, names, X, y)
+
