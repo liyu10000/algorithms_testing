@@ -18,6 +18,17 @@ def news():
     return X, y
 
 
+def wine():
+    winenames = ['label','Alcohol','Malic acid','Ash','Alcalinity of ash',
+                'Magnesium','Total phenols','Flavanoids','Nonflavanoid phenols',
+                'Proanthocyanins','Color intensity','Hue','OD280/OD315 of diluted wines',
+                'Proline']
+    wine = pd.read_csv('wine.data',sep=',',header=None, names=winenames, engine='python')
+    X = wine.values[:, 1:14]
+    y = wine.values[:,0]
+    return X, y
+
+
 def santander():
     df = pd.read_csv('./santander/train.csv')
     xdf = df.drop(['ID_code', 'target'], axis=1)
@@ -89,7 +100,8 @@ def load_results(name):
 
 if __name__ == '__main__':
     # X, y = news()
-    X, y = santander()
+    # X, y = santander()
+    X, y = wine()
     print(X.shape, y.shape)
 
     clfs, names = classifiers()
@@ -97,7 +109,7 @@ if __name__ == '__main__':
     results = test(clfs, names, X, y)
     pprint(results)
 
-    name = './santander/results.pkl'
+    name = './wine.pkl'
     save_results(name, results)
 
 

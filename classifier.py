@@ -22,8 +22,8 @@ class Classifier:
         5. default: error = 1 - accuracy
         """
         p_pred = self.clf.predict_proba(X)[:, 1]  # probability
-        b_pred = np.where(p_pred > 0.5, 1, 0)     # binary 
-        # b_pred = self.clf.predict(X)              # binary 
+        # b_pred = np.where(p_pred > 0.5, 1, 0)     # binary 
+        b_pred = self.clf.predict(X)              # binary 
         if metric == 'accuracy':
             score = accuracy_score(y, b_pred)
         elif metric == 'precision':
