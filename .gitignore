@@ -4,6 +4,7 @@ __pycache__
 *.sh
 *.out
 *.pkl
+*.txt
 *.data
 *.ipynb
 /santander
