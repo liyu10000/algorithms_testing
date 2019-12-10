@@ -14,3 +14,6 @@ Use statistical testing to determine if two binary classifiers have the same per
 
 ### Usage
 Sample code is in `demo.py`. 
+
+### Todo
+Add time recording codes.
