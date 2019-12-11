@@ -1,4 +1,5 @@
 import os
+import time
 import pickle
 import numpy as np
 import pandas as pd
@@ -67,7 +68,9 @@ def test(clfs, names, X, y):
 
             print("\n\nTesting {} vs. {}".format(names[i], names[j]))
             print("\nMcNemar's test:")
+            t1MN = time.time()
             rejectMN, score1MN, score2MN = McNemarTest(clf1, clf2, X, y)
+            t2MN = time.time()
             if rejectMN:
                 print('reject null hypothesis')
             else:
@@ -75,13 +78,16 @@ def test(clfs, names, X, y):
 
 
             print("\n5x2 cv paired t test:")
+            t1CV = time.time()
             rejectCV, score1CV, score2CV = CV52PairedTTest(clf1, clf2, X, y)
+            t2CV = time.time()
             if rejectCV:
                 print('reject null hypothesis')
             else:
                 print('fail to reject null hypothesis: clf1 and clf2 make errors in the same way')
 
-            results[names[i]][names[j]] = {'McNemar':[rejectMN, score1MN, score2MN], '52CV':[rejectCV, score1CV, score2CV]}
+            results[names[i]][names[j]] = {'McNemar':[rejectMN, score1MN, score2MN, t2MN-t1MN], 
+                                           '52CV':[rejectCV, score1CV, score2CV, t2CV-t1CV]}
 
     return results
 
